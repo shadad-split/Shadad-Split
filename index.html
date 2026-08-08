@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>GymTrack</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #0E0E10; color: #F5F5F7; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+  input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type=number] { -moz-appearance: textfield; }
+  button { font-family: inherit; cursor: pointer; border: none; }
+  input { font-family: inherit; }
+  .wrap { max-width: 420px; margin: 0 auto; padding: 32px 20px 48px; }
+  .row-between { display: flex; align-items: center; justify-content: space-between; }
+  .card { background: #1A1A1D; border: 1px solid #2A2A2E; border-radius: 16px; }
+  .muted { color: #6B6B72; }
+  .sub { color: #9A9AA2; }
+  .heading { font-family: 'Space Grotesk', sans-serif; }
+  .circle-btn { width: 36px; height: 36px; border-radius: 999px; display: flex; align-items: center; justify-content: center; background: #1A1A1D; border: 1px solid #2A2A2E; }
+  .weekday { text-align: center; font-size: 11px; font-weight: 500; color: #6B6B72; }
+  .day-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6px 0; gap: 4px; border-radius: 12px; background: transparent; border: 1px solid transparent; width: 100%; }
+  .day-cell.today { border-color: #3DDC84; }
+  .day-num { font-size: 13px; color: #C8C8CE; }
+  .day-num.today { color: #fff; font-weight: 700; }
+  .dot { width: 5px; height: 5px; border-radius: 999px; background: transparent; }
+  .grid7 { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 10px 12px; margin-top: 28px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #6B6B72; }
+  .type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .type-btn { text-align: left; padding: 16px; border-radius: 16px; background: #1A1A1D; border: 1px solid #2A2A2E; }
+  .type-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+  .ex-card { border-radius: 16px; padding: 16px; background: #1A1A1D; border: 1px solid #2A2A2E; margin-bottom: 12px; }
+  .ex-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .ex-name { font-size: 14px; font-weight: 600; color: #fff; }
+  .ex-meta { font-size: 11px; color: #6B6B72; margin: 4px 0 0; white-space: normal; }
+  .rest-pill { color: #E8B84B; font-weight: 500; }
+  .icon-btn { background: transparent; display: flex; align-items: center; }
+  .guide-link-btn { margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; background: #3DDC84; color: #0E0E10; border: none; border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: none; }
+  .video-btn { width: 26px; height: 26px; border-radius: 999px; justify-content: center; background: #3DDC84; text-decoration: none; }
+  .set-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .set-label { font-size: 11px; color: #6B6B72; width: 44px; flex-shrink: 0; }
+  .set-input-wrap { flex: 1; display: flex; align-items: center; border-radius: 12px; padding: 8px 12px; background: #111113; }
+  .set-input-wrap input { flex: 1; background: transparent; border: none; outline: none; color: #fff; font-size: 13px; width: 100%; }
+  .set-input-wrap input::placeholder { color: #6B6B72; opacity: 1; }
+  .set-unit { font-size: 11px; color: #6B6B72; }
+  .add-btn { width: 100%; border-radius: 16px; padding: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; font-weight: 500; background: #1A1A1D; border: 1px dashed #2A2A2E; color: #9A9AA2; }
+  .add-input-row { border-radius: 16px; padding: 12px; display: flex; align-items: center; gap: 8px; background: #1A1A1D; border: 1px solid #2A2A2E; }
+  .add-input-row input { flex: 1; background: transparent; border: none; outline: none; color: #fff; font-size: 13px; padding: 0 4px; }
+  .sq-btn { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .edit-input { flex: 1; background: transparent; border: none; border-bottom: 1px solid #3DDC84; outline: none; color: #fff; font-size: 14px; font-weight: 600; padding-bottom: 2px; }
+  .type-banner { border-radius: 16px; padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+  .change-pill { font-size: 12px; font-weight: 500; padding: 6px 12px; border-radius: 999px; background: #1A1A1D; border: 1px solid #2A2A2E; color: #9A9AA2; }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 0 24px; z-index: 50; }
+  .modal-card { width: 100%; max-width: 320px; border-radius: 16px; padding: 20px; background: #1A1A1D; border: 1px solid #2A2A2E; }
+  .modal-actions { display: flex; gap: 8px; margin-top: 16px; }
+  .modal-btn { flex: 1; padding: 10px; border-radius: 12px; font-size: 13px; font-weight: 600; }
+  .backup-row { display: flex; gap: 10px; margin-bottom: 22px; }
+  .backup-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; border-radius: 12px; background: #1A1A1D; border: 1px solid #2A2A2E; color: #C8C8CE; font-size: 12px; font-weight: 500; }
+  .toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); background: #1A1A1D; border: 1px solid #2A2A2E; color: #fff; font-size: 13px; padding: 10px 18px; border-radius: 999px; z-index: 60; box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ------------------------------------------------------------------
+   Config
+------------------------------------------------------------------ */
+const TYPE_KEYS = ["day1","day2","day3","day4","day5","rest"];
+const TYPE_META = {
+  day1: { label: "Day 1", color: "#FF4D5E" },
+  day2: { label: "Day 2", color: "#3DDC84" },
+  day3: { label: "Day 3", color: "#E8B84B" },
+  day4: { label: "Day 4", color: "#8B7FFF" },
+  day5: { label: "Day 5", color: "#4DC8FF" },
+  rest: { label: "Rest",  color: "#6B7280" },
+};
+// Each exercise: name, wu (warm-up sets), sets (working sets), reps, rir, rest (rest time), link (workout video)
+const DEFAULT_EXERCISES = {
+  day1: [
+    { name: "Cable y raises",        wu: "1", sets: "2", reps: "8-12",  rir: "1-0", rest: "1-2 min",   link: "https://www.youtube.com/watch?v=9zhh-aGUrcs&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=20" },
+    { name: "Wide grip latpulldown", wu: "1", sets: "3", reps: "6-10",  rir: "1-0", rest: "2-3 min",   link: "https://www.youtube.com/watch?v=eTy8dMwWptc&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=55" },
+    { name: "Kelso shrugs",          wu: "1", sets: "2", reps: "8-12",  rir: "1-0", rest: "2-3 min",   link: "https://youtu.be/iqXvQKmU-Uk" },
+    { name: "T bar machine",         wu: "",  sets: "1", reps: "6-10",  rir: "1-0", rest: "2-3 min",   link: "https://www.youtube.com/watch?v=JohmkrpUJK4&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=53" },
+    { name: "Cable lat pullover",    wu: "1", sets: "3", reps: "6-10",  rir: "1-0", rest: "2-3 min",   link: "https://www.youtube.com/watch?v=ErXQXPzijLk&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=58" },
+    { name: "Db lateral raises",     wu: "1", sets: "2", reps: "8-10",  rir: "1-0", rest: "2-3 min",   link: "https://www.youtube.com/watch?v=U6-py46Cdnc&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=50" },
+    { name: "Cable reverse curl",    wu: "1", sets: "1", reps: "8-12",  rir: "1-2", rest: "1.5-2 min", link: "https://www.youtube.com/watch?v=_cfnX1qsEWw&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=56" },
+    { name: "Abdominal crunches",    wu: "1", sets: "2", reps: "8-12",  rir: "1-0", rest: "1.5-2 min", link: "https://youtu.be/a9czVmDjB0E" },
+  ],
+  day2: [
+    { name: "DB low incline chest press", wu: "2", sets: "3", reps: "6-10",  rir: "1-0", rest: "2-3 min",   link: "https://www.youtube.com/watch?v=ZT78Lf66NXw&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=4" },
+    { name: "Chest fly machine",          wu: "",  sets: "2", reps: "8-12",  rir: "1-0", rest: "2-3 min",   link: "https://www.youtube.com/watch?v=GWq3xgNzRpk&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=16" },
+    { name: "DB no cheat curl",           wu: "1", sets: "2", reps: "8-12",  rir: "1-0", rest: "2-3 min",   link: "" },
+    { name: "Rope triceps pushdown",      wu: "1", sets: "3", reps: "8-12",  rir: "1-0", rest: "2-3 min",   link: "https://www.youtube.com/watch?v=jIKXu_m_WxM&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=13" },
+    { name: "Biceps bayesian curl",       wu: "1", sets: "2", reps: "8-12",  rir: "1-0", rest: "2-3 min",   link: "https://www.youtube.com/watch?v=KbSCjlMnuwQ&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=22" },
+    { name: "Rope overhead extension",    wu: "1", sets: "2", reps: "8-10",  rir: "1-0", rest: "1.5-2 min", link: "https://www.youtube.com/watch?v=OKoLcDpJGrM&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=11" },
+    { name: "Cable hammer curl",          wu: "",  sets: "1", reps: "8-10",  rir: "1-0", rest: "1.5-2 min", link: "https://www.youtube.com/watch?v=1leUFof4BSM&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=21" },
+  ],
+  day3: [
+    { name: "Seated leg curl",            wu: "2", sets: "2", reps: "10-12", rir: "1-0", rest: "2-3 min",   link: "https://www.youtube.com/watch?v=sEPovssMLqM&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=43" },
+    { name: "Leg press machine",          wu: "2", sets: "2", reps: "8-12",  rir: "1-0", rest: "2-3 min",   link: "https://www.youtube.com/watch?v=1QlJC8ezMvE&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=42" },
+    { name: "Smith hip thrust",           wu: "1", sets: "1", reps: "8-12",  rir: "1-0", rest: "2-3 min",   link: "https://www.youtube.com/watch?v=-C3rQT56iSs&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=34" },
+    { name: "Adductors machine",          wu: "1", sets: "2", reps: "8-12",  rir: "1-0", rest: "2-3 min",   link: "https://www.youtube.com/watch?v=EZzpfk62hDA&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=62" },
+    { name: "Smith standing calf raises", wu: "1", sets: "3", reps: "8-12",  rir: "1-0", rest: "2-3 min",   link: "https://www.youtube.com/watch?v=p_T9O2gHwPA&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=36" },
+    { name: "Cable lateral raises W.H",   wu: "1", sets: "2", reps: "6-10",  rir: "1-0", rest: "1.5-2 min", link: "https://www.youtube.com/watch?v=YPiH3mkk14E&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=18" },
+    { name: "Cable torso rotation",       wu: "1", sets: "2", reps: "8-12",  rir: "1-0", rest: "1.5-2 min", link: "https://www.youtube.com/watch?v=-FWq-UK9FQ8&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=77" },
+    { name: "Abdominal crunches",         wu: "",  sets: "3", reps: "8-12",  rir: "1-0", rest: "1.5-2 min", link: "https://youtu.be/a9czVmDjB0E" },
+  ],
+  day4: [
+    { name: "T bar machine",                 wu: "1", sets: "2", reps: "6-10",  rir: "1-0", rest: "2-3 min",   link: "https://www.youtube.com/watch?v=JohmkrpUJK4&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=53" },
+    { name: "DB flat press",                 wu: "1", sets: "2", reps: "6-10",  rir: "1-0", rest: "2-3 min",   link: "https://www.youtube.com/watch?v=XSl_-gRMfbU&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=3" },
+    { name: "Wide grip latpulldown",         wu: "1", sets: "1", reps: "8-12",  rir: "1-0", rest: "2-3 min",   link: "https://www.youtube.com/watch?v=eTy8dMwWptc&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=55" },
+    { name: "Smith incline shoulder press",  wu: "",  sets: "1", reps: "6-10",  rir: "1-0", rest: "2-3 min",   link: "https://youtu.be/bhkhKJezbWM" },
+    { name: "Close grip seated row",         wu: "",  sets: "2", reps: "8-12",  rir: "1-0", rest: "2-3 min",   link: "" },
+    { name: "Lateral raises machine",        wu: "1", sets: "3", reps: "10-12", rir: "1-0", rest: "1.5-2 min", link: "https://www.youtube.com/watch?v=2TmJNXAKv6M&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=76" },
+    { name: "DB preacher curl",              wu: "1", sets: "2", reps: "8-12",  rir: "1-0", rest: "1.5-2 min", link: "https://www.youtube.com/watch?v=VbW41i0wZek&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=27" },
+    { name: "Rope triceps pushdown",         wu: "1", sets: "2", reps: "8-12",  rir: "1-0", rest: "1.5-2 min", link: "https://www.youtube.com/watch?v=G2RWJv6NXzk&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=28" },
+  ],
+  day5: [
+    { name: "RDLS",                       wu: "2", sets: "3", reps: "8-12",  rir: "1-0", rest: "2-3 min",   link: "https://www.youtube.com/watch?v=zoYMNYMk1rM&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=52" },
+    { name: "Hack squat machine",         wu: "1", sets: "2", reps: "6-10",  rir: "1-0", rest: "2-3 min",   link: "https://www.youtube.com/watch?v=Rv9546lEiW8&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=44" },
+    { name: "Leg extension machine",      wu: "",  sets: "3", reps: "8-12",  rir: "1-0", rest: "2-3 min",   link: "https://www.youtube.com/watch?v=Es1dBdx448g&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=61" },
+    { name: "Lying leg curl",             wu: "",  sets: "2", reps: "6-10",  rir: "1-0", rest: "2-3 min",   link: "https://www.youtube.com/watch?v=T275UXpIXug&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=41" },
+    { name: "Adductors machine",          wu: "1", sets: "2", reps: "8-12",  rir: "1-0", rest: "2-3 min",   link: "https://www.youtube.com/watch?v=EZzpfk62hDA&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=62" },
+    { name: "Db wrist flexion",           wu: "1", sets: "2", reps: "10-12", rir: "1-0", rest: "2-3 min",   link: "https://www.youtube.com/watch?v=V0qUjgoQNmk&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=51" },
+    { name: "Smith standing calf raises", wu: "1", sets: "3", reps: "8-12",  rir: "1-0", rest: "1.5-2 min", link: "https://www.youtube.com/watch?v=p_T9O2gHwPA&list=PLlvCYMcR6vcVpeIUZgkFaQWZKGF49w5Bz&index=36" },
+  ],
+  rest: [],
+};
+const BASE_EFFECTIVE_DATE = "0000-01-01";
+const STORAGE_PREFIX = "gymtrack:";
+
+const slugify = (name) => (name.toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/(^-+|-+$)/g,"")) || "ex";
+const uniqueId = (existing, base) => { let id = base, i = 2; while (existing.some(e => e.id === id)) { id = base + "-" + i; i++; } return id; };
+const buildDefaultTypes = () => {
+  const types = {};
+  for (const key of TYPE_KEYS) {
+    const list = [];
+    for (const meta of DEFAULT_EXERCISES[key]) {
+      list.push({ id: uniqueId(list, slugify(meta.name)), name: meta.name, wu: meta.wu || "", sets: meta.sets || "", reps: meta.reps || "", rir: meta.rir || "", rest: meta.rest || "", link: meta.link || "" });
+    }
+    types[key] = list;
+  }
+  return types;
+};
+
+/* ------------------------------------------------------------------
+   Storage (localStorage)
+------------------------------------------------------------------ */
+const storageGet = (key) => { const raw = localStorage.getItem(STORAGE_PREFIX + key); return raw === null ? null : raw; };
+const storageSet = (key, value) => localStorage.setItem(STORAGE_PREFIX + key, value);
+const storageDelete = (key) => localStorage.removeItem(STORAGE_PREFIX + key);
+
+/* ------------------------------------------------------------------
+   Date helpers
+------------------------------------------------------------------ */
+const pad2 = (n) => String(n).padStart(2, "0");
+const toDateStr = (d) => `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+const todayStr = () => toDateStr(new Date());
+const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const WEEKDAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+function getMonthGrid(monthCursor) {
+  const year = monthCursor.getFullYear(), month = monthCursor.getMonth();
+  const startWeekday = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const cells = [];
+  for (let i = 0; i < startWeekday; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(year, month, d));
+  return cells;
+}
+
+/* ------------------------------------------------------------------
+   Config version resolution
+------------------------------------------------------------------ */
+function getEffectiveTypes(dateStr, versions) {
+  if (!versions || versions.length === 0) return buildDefaultTypes();
+  const sorted = [...versions].sort((a,b) => a.effectiveDate < b.effectiveDate ? -1 : 1);
+  let chosen = sorted[0];
+  for (const v of sorted) { if (v.effectiveDate <= dateStr) chosen = v; else break; }
+  const clone = {};
+  for (const k of TYPE_KEYS) clone[k] = (chosen.types[k] || []).map(e => ({...e}));
+  return clone;
+}
+function upsertVersion(versions, dateStr, newTypesSnapshot) {
+  const idx = versions.findIndex(v => v.effectiveDate === dateStr);
+  const next = [...versions];
+  if (idx >= 0) next[idx] = { effectiveDate: dateStr, types: newTypesSnapshot };
+  else next.push({ effectiveDate: dateStr, types: newTypesSnapshot });
+  return next.sort((a,b) => a.effectiveDate < b.effectiveDate ? -1 : 1);
+}
+
+/* ------------------------------------------------------------------
+   Icons (small inline SVGs)
+------------------------------------------------------------------ */
+function icon(name, size, color) {
+  size = size || 16; color = color || "currentColor";
+  const p = `width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"`;
+  const paths = {
+    chevronLeft: `<polyline points="15 18 9 12 15 6"></polyline>`,
+    chevronRight: `<polyline points="9 18 15 12 9 6"></polyline>`,
+    arrowLeft: `<line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline>`,
+    plus: `<line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>`,
+    pencil: `<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>`,
+    trash: `<polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>`,
+    check: `<polyline points="20 6 9 17 4 12"></polyline>`,
+    x: `<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>`,
+    moon: `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>`,
+    dumbbell: `<path d="m6.5 6.5 11 11"></path><path d="m21 21-1-1"></path><path d="m3 3 1 1"></path><path d="m18 22 4-4"></path><path d="m2 6 4-4"></path><path d="m3 10 7-7"></path><path d="m14 21 7-7"></path>`,
+    download: `<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>`,
+    upload: `<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line>`,
+    play: `<polygon points="6 3 20 12 6 21 6 3" fill="${color}" stroke="none"></polygon>`,
+  };
+  return `<svg ${p}>${paths[name] || ""}</svg>`;
+}
+
+/* ------------------------------------------------------------------
+   State
+------------------------------------------------------------------ */
+const state = {
+  versions: null,
+  logIndex: {},
+  view: "month",
+  monthCursor: (() => { const t = new Date(); return new Date(t.getFullYear(), t.getMonth(), 1); })(),
+  selectedDate: null,
+  dayLog: null,
+  editingId: null,
+  editingValue: "",
+  adding: false,
+  newExerciseName: "",
+  modal: null,
+};
+
+const CONFIG_SCHEMA_VERSION = "2-day1to5";
+function init() {
+  const storedSchema = storageGet("config-schema-version");
+  const rawVersions = storageGet("config-versions");
+  if (rawVersions && storedSchema === CONFIG_SCHEMA_VERSION) {
+    state.versions = JSON.parse(rawVersions);
+  } else {
+    // Fresh install OR the exercise structure changed since the data was saved
+    // (e.g. an older Push/Pull split cached in this browser) — reseed the
+    // exercise config with the current default split without touching logged sets.
+    state.versions = [{ effectiveDate: BASE_EFFECTIVE_DATE, types: buildDefaultTypes() }];
+    storageSet("config-versions", JSON.stringify(state.versions));
+    storageSet("config-schema-version", CONFIG_SCHEMA_VERSION);
+  }
+  const rawIndex = storageGet("log-index");
+  state.logIndex = rawIndex ? JSON.parse(rawIndex) : {};
+  render();
+}
+
+function persistVersions() { storageSet("config-versions", JSON.stringify(state.versions)); }
+function persistLogIndex() { storageSet("log-index", JSON.stringify(state.logIndex)); }
+
+let saveTimer = null;
+function persistDayLogDebounced() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    if (state.dayLog) storageSet(`log:${state.selectedDate}`, JSON.stringify(state.dayLog));
+    else storageDelete(`log:${state.selectedDate}`);
+  }, 250);
+}
+
+/* ------------------------------------------------------------------
+   Look up the last time this exact exercise+set had a weight logged,
+   searching backward from (but not including) beforeDateStr.
+------------------------------------------------------------------ */
+function findPreviousWeight(exId, setIdx, beforeDateStr) {
+  const dates = Object.keys(state.logIndex).filter(d => d < beforeDateStr).sort().reverse();
+  for (const d of dates) {
+    const raw = storageGet(`log:${d}`);
+    if (!raw) continue;
+    let log;
+    try { log = JSON.parse(raw); } catch (e) { continue; }
+    if (!log.exercises) continue;
+    const ex = log.exercises.find(e => e.id === exId);
+    if (ex && ex.sets && ex.sets[setIdx] && ex.sets[setIdx].weight !== "" && ex.sets[setIdx].weight != null) {
+      return ex.sets[setIdx].weight;
+    }
+  }
+  return null;
+}
+
+/* ------------------------------------------------------------------
+   Backup / restore (protects data from browser "clear site data")
+------------------------------------------------------------------ */
+let toastTimer = null;
+function showToast(msg) {
+  clearTimeout(toastTimer);
+  let el = document.getElementById("toast");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "toast";
+    el.className = "toast";
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.display = "block";
+  toastTimer = setTimeout(() => { el.style.display = "none"; }, 2200);
+}
+
+function exportBackup() {
+  const logs = {};
+  Object.keys(state.logIndex).forEach(d => {
+    const raw = storageGet(`log:${d}`);
+    if (raw) logs[d] = JSON.parse(raw);
+  });
+  const payload = {
+    app: "gymtrack",
+    exportedAt: new Date().toISOString(),
+    versions: state.versions,
+    logIndex: state.logIndex,
+    logs,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `gymtrack-backup-${todayStr()}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  showToast("Backup file downloaded ✓");
+}
+
+function triggerImport() {
+  const input = document.getElementById("import-file-input");
+  if (input) input.click();
+}
+
+function handleImportFile(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (!data || data.app !== "gymtrack" || !data.versions || !data.logIndex) {
+        showToast("This doesn't look like a valid backup file");
+        return;
+      }
+      state.versions = data.versions;
+      state.logIndex = data.logIndex;
+      persistVersions();
+      persistLogIndex();
+      Object.keys(data.logs || {}).forEach(d => {
+        storageSet(`log:${d}`, JSON.stringify(data.logs[d]));
+      });
+      state.view = "month";
+      state.selectedDate = null;
+      state.dayLog = null;
+      render();
+      showToast("Backup restored ✓");
+    } catch (e) {
+      showToast("Couldn't read that file");
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = "";
+}
+
+/* ------------------------------------------------------------------
+   Actions
+------------------------------------------------------------------ */
+function openDay(dateObj) {
+  const dStr = toDateStr(dateObj);
+  state.selectedDate = dStr;
+  state.view = "day";
+  state.editingId = null;
+  state.adding = false;
+  const raw = storageGet(`log:${dStr}`);
+  state.dayLog = raw ? JSON.parse(raw) : null;
+  render();
+}
+function backToMonth() { state.view = "month"; state.selectedDate = null; state.dayLog = null; render(); }
+
+function targetSetCount(ex) {
+  const n = parseInt(ex && ex.sets, 10);
+  return Number.isFinite(n) && n > 0 ? n : 2;
+}
+
+function selectType(typeKey) {
+  const effective = getEffectiveTypes(state.selectedDate, state.versions);
+  const exercises = (effective[typeKey] || []).map(e => ({
+    id: e.id,
+    sets: Array.from({ length: targetSetCount(e) }, () => ({ weight: "", reps: "" })),
+  }));
+  state.dayLog = { type: typeKey, exercises };
+  state.logIndex[state.selectedDate] = typeKey;
+  persistLogIndex();
+  storageSet(`log:${state.selectedDate}`, JSON.stringify(state.dayLog));
+  render();
+}
+
+function requestChangeType() {
+  state.modal = {
+    title: "Change workout type?",
+    message: "This resets today's logged sets so you can pick a different workout.",
+    confirmLabel: "Change",
+    danger: true,
+    onConfirm: () => {
+      state.dayLog = null;
+      delete state.logIndex[state.selectedDate];
+      persistLogIndex();
+      storageDelete(`log:${state.selectedDate}`);
+      state.modal = null;
+      render();
+    },
+  };
+  render();
+}
+
+function updateSet(exId, setIdx, field, value) {
+  const ex = state.dayLog.exercises.find(e => e.id === exId);
+  if (!ex) return;
+  ex.sets[setIdx][field] = value;
+  persistDayLogDebounced();
+}
+
+function startEdit(id, name) { state.editingId = id; state.editingValue = name; render(); }
+function cancelEdit() { state.editingId = null; render(); }
+function confirmEdit() {
+  const name = state.editingValue.trim();
+  if (!name || !state.dayLog) { state.editingId = null; render(); return; }
+  const snapshot = getEffectiveTypes(state.selectedDate, state.versions);
+  snapshot[state.dayLog.type] = snapshot[state.dayLog.type].map(e => e.id === state.editingId ? {...e, name} : e);
+  state.versions = upsertVersion(state.versions, state.selectedDate, snapshot);
+  persistVersions();
+  state.editingId = null;
+  render();
+}
+
+function confirmAdd() {
+  const name = state.newExerciseName.trim();
+  if (!name || !state.dayLog) { state.adding = false; state.newExerciseName = ""; render(); return; }
+  const snapshot = getEffectiveTypes(state.selectedDate, state.versions);
+  const list = snapshot[state.dayLog.type];
+  const id = uniqueId(list, slugify(name));
+  list.push({ id, name, wu: "", sets: "", reps: "", rir: "", rest: "", link: "" });
+  state.versions = upsertVersion(state.versions, state.selectedDate, snapshot);
+  persistVersions();
+  state.dayLog.exercises.push({ id, sets: [{weight:"",reps:""},{weight:"",reps:""}] });
+  storageSet(`log:${state.selectedDate}`, JSON.stringify(state.dayLog));
+  state.newExerciseName = "";
+  state.adding = false;
+  render();
+}
+
+function requestDelete(exId, name) {
+  state.modal = {
+    title: "Delete exercise?",
+    message: `"${name}" will be removed from this workout, from today onward.`,
+    confirmLabel: "Delete",
+    danger: true,
+    onConfirm: () => {
+      const snapshot = getEffectiveTypes(state.selectedDate, state.versions);
+      snapshot[state.dayLog.type] = snapshot[state.dayLog.type].filter(e => e.id !== exId);
+      state.versions = upsertVersion(state.versions, state.selectedDate, snapshot);
+      persistVersions();
+      state.dayLog.exercises = state.dayLog.exercises.filter(e => e.id !== exId);
+      storageSet(`log:${state.selectedDate}`, JSON.stringify(state.dayLog));
+      state.modal = null;
+      render();
+    },
+  };
+  render();
+}
+
+/* ------------------------------------------------------------------
+   Render
+------------------------------------------------------------------ */
+function render() {
+  const app = document.getElementById("app");
+  app.innerHTML = state.view === "month" ? renderMonth() : renderDay();
+  attachListeners();
+}
+
+function ringSvg(percent, color, size, stroke) {
+  size = size || 44; stroke = stroke || 5;
+  const r = (size - stroke) / 2, c = 2 * Math.PI * r;
+  const offset = c - (Math.min(100, Math.max(0, percent)) / 100) * c;
+  return `<div style="width:${size}px;height:${size}px;position:relative;">
+    <svg width="${size}" height="${size}" style="transform:rotate(-90deg)">
+      <circle cx="${size/2}" cy="${size/2}" r="${r}" stroke="#2A2A2E" stroke-width="${stroke}" fill="none"></circle>
+      <circle cx="${size/2}" cy="${size/2}" r="${r}" stroke="${color}" stroke-width="${stroke}" fill="none" stroke-dasharray="${c}" stroke-dashoffset="${offset}" stroke-linecap="round"></circle>
+    </svg>
+    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+      <span style="font-size:12px;font-weight:700;color:#fff;">${Math.round(percent)}%</span>
+    </div>
+  </div>`;
+}
+
+function renderMonth() {
+  const cells = getMonthGrid(state.monthCursor);
+  const today = todayStr();
+  const monthDates = cells.filter(Boolean).map(toDateStr);
+  const logged = monthDates.filter(d => state.logIndex[d]).length;
+  const trained = monthDates.filter(d => state.logIndex[d] && state.logIndex[d] !== "rest").length;
+  const percent = monthDates.length ? (logged / monthDates.length) * 100 : 0;
+
+  const dayCells = cells.map((d, i) => {
+    if (!d) return `<div></div>`;
+    const dStr = toDateStr(d);
+    const type = state.logIndex[dStr];
+    const isToday = dStr === today;
+    return `<button class="day-cell ${isToday ? "today" : ""}" data-open-day="${dStr}">
+      <span class="day-num ${isToday ? "today" : ""}">${d.getDate()}</span>
+      <span class="dot" style="background:${type ? TYPE_META[type].color : "transparent"}"></span>
+    </button>`;
+  }).join("");
+
+  const legend = TYPE_KEYS.map(k => `<div class="legend-item"><span style="width:6px;height:6px;border-radius:999px;background:${TYPE_META[k].color}"></span>${TYPE_META[k].label}</div>`).join("");
+
+  return `
+    <div class="wrap">
+      <div class="row-between" style="margin-bottom:24px;">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+            <div style="width:28px;height:28px;border-radius:8px;background:#FF4D5E;display:flex;align-items:center;justify-content:center;">${icon("dumbbell",15,"#fff")}</div>
+            <span class="muted" style="font-size:13px;font-weight:600;letter-spacing:.04em;">GYMTRACK</span>
+          </div>
+          <h1 class="heading" style="font-size:22px;font-weight:700;color:#fff;margin:0;">${MONTH_NAMES[state.monthCursor.getMonth()]} <span class="muted">${state.monthCursor.getFullYear()}</span></h1>
+          <a class="guide-link-btn" href="https://drive.google.com/file/d/1iG3bYhPIsCnQbdwsboNmSe9wdvfOkQ5d/view?usp=drivesdk" target="_blank" rel="noopener noreferrer">${icon("play",10,"#0E0E10")} شرح السبليت (PDF)</a>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="circle-btn" data-prev-month>${icon("chevronLeft",17,"#C8C8CE")}</button>
+          <button class="circle-btn" data-next-month>${icon("chevronRight",17,"#C8C8CE")}</button>
+        </div>
+      </div>
+
+      <div class="backup-row">
+        <button class="backup-btn" data-export-backup>${icon("download",14)} Export backup</button>
+        <button class="backup-btn" data-import-backup>${icon("upload",14)} Restore backup</button>
+      </div>
+      <input type="file" id="import-file-input" accept="application/json" style="display:none" />
+
+      <div class="card row-between" style="padding:16px;margin-bottom:24px;">
+        <div>
+          <p class="muted" style="font-size:12px;margin:0 0 4px;">Monthly consistency</p>
+          <p class="heading" style="font-size:20px;font-weight:700;color:#fff;margin:0;">${trained} <span class="sub" style="font-size:13px;font-weight:500;">workouts logged</span></p>
+        </div>
+        ${ringSvg(percent, "#3DDC84", 54, 6)}
+      </div>
+
+      <div class="grid7" style="margin-bottom:8px;">
+        ${WEEKDAYS.map(w => `<div class="weekday">${w}</div>`).join("")}
+      </div>
+      <div class="grid7" style="row-gap:6px;">${dayCells}</div>
+
+      <div class="legend">${legend}</div>
+    </div>
+    ${renderModal()}
+  `;
+}
+
+function renderDay() {
+  const dateObj = new Date(state.selectedDate + "T00:00:00");
+  const niceDate = dateObj.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+  const dayLog = state.dayLog;
+  const effectiveTypes = getEffectiveTypes(state.selectedDate, state.versions);
+  const typeMeta = dayLog ? TYPE_META[dayLog.type] : null;
+  const typeList = dayLog ? effectiveTypes[dayLog.type] : [];
+
+  let body = "";
+
+  if (!dayLog) {
+    const cards = TYPE_KEYS.map(key => {
+      const meta = TYPE_META[key];
+      const count = (effectiveTypes[key] || []).length;
+      return `<button class="type-btn" data-select-type="${key}">
+        <div class="type-icon" style="background:${meta.color}22">${icon(key === "rest" ? "moon" : "dumbbell", 15, meta.color)}</div>
+        <p style="font-size:13px;font-weight:600;color:#fff;margin:0;">${meta.label}</p>
+        <p class="muted" style="font-size:11px;margin:4px 0 0;">${key === "rest" ? "Recovery day" : count + " exercises"}</p>
+      </button>`;
+    }).join("");
+    body = `<p class="sub" style="font-size:13px;margin:0 0 16px;">What did you train today?</p><div class="type-grid">${cards}</div>`;
+  } else if (dayLog.type === "rest") {
+    body = `<div class="card" style="padding:32px;display:flex;flex-direction:column;align-items:center;text-align:center;margin-top:16px;">
+      ${icon("moon",28,typeMeta.color)}
+      <p style="font-size:14px;font-weight:600;color:#fff;margin:12px 0 4px;">Recovery day</p>
+      <p class="muted" style="font-size:12px;margin:0;">No exercises logged — let the muscles rebuild.</p>
+    </div>`;
+  } else {
+    const exCards = dayLog.exercises.map(ex => {
+      const meta = typeList.find(t => t.id === ex.id);
+      const name = meta ? meta.name : ex.id;
+      const isEditing = state.editingId === ex.id;
+      const head = isEditing
+        ? `<div style="display:flex;align-items:center;gap:8px;flex:1;">
+            <input class="edit-input" data-edit-input value="${escapeHtml(state.editingValue)}" style="border-color:${typeMeta.color}" />
+            <button class="icon-btn" data-confirm-edit>${icon("check",16,"#3DDC84")}</button>
+            <button class="icon-btn" data-cancel-edit>${icon("x",16,"#6B6B72")}</button>
+          </div>`
+        : `<div style="flex:1;min-width:0;">
+             <p class="ex-name" style="margin:0;">${escapeHtml(name)}</p>
+             ${(meta && (meta.sets || meta.reps || meta.rest)) ? `<p class="ex-meta">${[meta.wu ? escapeHtml(meta.wu) + " WU + " : "", meta.sets ? escapeHtml(meta.sets) + " sets" : "", meta.reps ? " × " + escapeHtml(meta.reps) + " reps" : "", meta.rir ? " · RIR " + escapeHtml(meta.rir) : "", meta.rest ? ` · <span class="rest-pill">⏱ ${escapeHtml(meta.rest)}</span>` : ""].join("")}</p>` : ""}
+           </div>
+           <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+            ${meta && meta.link ? `<a class="icon-btn video-btn" href="${escapeHtml(meta.link)}" target="_blank" rel="noopener noreferrer" title="Watch exercise video">${icon("play",13,"#0E0E10")}</a>` : ""}
+            <button class="icon-btn" data-start-edit="${ex.id}" data-name="${escapeHtml(name)}">${icon("pencil",13,"#6B6B72")}</button>
+            <button class="icon-btn" data-delete-ex="${ex.id}" data-name="${escapeHtml(name)}">${icon("trash",13,"#6B6B72")}</button>
+           </div>`;
+      const sets = ex.sets.map((s, i) => {
+        const prevWeight = s.weight === "" ? findPreviousWeight(ex.id, i, state.selectedDate) : null;
+        const weightPlaceholder = prevWeight !== null ? prevWeight : "0";
+        return `
+        <div class="set-row">
+          <span class="set-label">Set ${i+1}</span>
+          <div class="set-input-wrap">
+            <input type="number" inputmode="decimal" placeholder="${escapeHtml(weightPlaceholder)}" value="${escapeHtml(s.weight)}" data-set-input data-ex="${ex.id}" data-idx="${i}" data-field="weight" />
+            <span class="set-unit">kg</span>
+          </div>
+          <div class="set-input-wrap">
+            <input type="number" inputmode="numeric" placeholder="0" value="${escapeHtml(s.reps)}" data-set-input data-ex="${ex.id}" data-idx="${i}" data-field="reps" />
+            <span class="set-unit">reps</span>
+          </div>
+        </div>`;
+      }).join("");
+      return `<div class="ex-card"><div class="ex-head">${head}</div>${sets}</div>`;
+    }).join("");
+
+    const addBlock = state.adding
+      ? `<div class="add-input-row">
+          <input data-new-ex-input value="${escapeHtml(state.newExerciseName)}" placeholder="Exercise name" autofocus />
+          <button class="sq-btn" style="background:#3DDC84" data-confirm-add>${icon("check",14,"#08150D")}</button>
+          <button class="sq-btn" style="background:#242428" data-cancel-add>${icon("x",14,"#9A9AA2")}</button>
+        </div>`
+      : `<button class="add-btn" data-start-add>${icon("plus",15)} Add exercise</button>`;
+
+    body = `
+      <div class="type-banner" style="background:${typeMeta.color}18;border:1px solid ${typeMeta.color}33">
+        <span style="width:8px;height:8px;border-radius:999px;background:${typeMeta.color}"></span>
+        <span style="font-size:13px;font-weight:600;color:${typeMeta.color}">${typeMeta.label} day</span>
+      </div>
+      ${exCards}
+      <div style="margin-top:4px;">${addBlock}</div>
+    `;
+  }
+
+  const changeBtn = dayLog ? `<button class="change-pill" data-change-type>Change</button>` : `<div style="width:36px;"></div>`;
+
+  return `
+    <div class="wrap">
+      <div class="row-between" style="margin-bottom:24px;">
+        <button class="circle-btn" data-back-month>${icon("arrowLeft",17,"#C8C8CE")}</button>
+        <h1 class="heading" style="font-size:16px;font-weight:600;color:#fff;margin:0;">${niceDate}</h1>
+        ${changeBtn}
+      </div>
+      ${body}
+    </div>
+    ${renderModal()}
+  `;
+}
+
+function renderModal() {
+  if (!state.modal) return "";
+  const m = state.modal;
+  return `
+    <div class="modal-overlay" data-modal-overlay>
+      <div class="modal-card" data-modal-card>
+        <h3 class="heading" style="font-size:15px;font-weight:600;color:#fff;margin:0 0 6px;">${m.title}</h3>
+        <p class="sub" style="font-size:13px;line-height:1.5;margin:0;">${m.message}</p>
+        <div class="modal-actions">
+          <button class="modal-btn" data-modal-cancel style="background:#242428;color:#C8C8CE;">Cancel</button>
+          <button class="modal-btn" data-modal-confirm style="background:${m.danger ? "#FF4D5E" : "#3DDC84"};color:${m.danger ? "#fff" : "#08150D"};">${m.confirmLabel}</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function escapeHtml(str) {
+  return String(str ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+}
+
+/* ------------------------------------------------------------------
+   Event delegation
+------------------------------------------------------------------ */
+function attachListeners() {
+  const app = document.getElementById("app");
+
+  app.querySelectorAll("[data-open-day]").forEach(el => el.addEventListener("click", () => {
+    const [y,m,d] = el.getAttribute("data-open-day").split("-").map(Number);
+    openDay(new Date(y, m-1, d));
+  }));
+  const prevBtn = app.querySelector("[data-prev-month]");
+  if (prevBtn) prevBtn.addEventListener("click", () => { state.monthCursor = new Date(state.monthCursor.getFullYear(), state.monthCursor.getMonth()-1, 1); render(); });
+  const nextBtn = app.querySelector("[data-next-month]");
+  if (nextBtn) nextBtn.addEventListener("click", () => { state.monthCursor = new Date(state.monthCursor.getFullYear(), state.monthCursor.getMonth()+1, 1); render(); });
+
+  const exportBtn = app.querySelector("[data-export-backup]");
+  if (exportBtn) exportBtn.addEventListener("click", exportBackup);
+  const importBtn = app.querySelector("[data-import-backup]");
+  if (importBtn) importBtn.addEventListener("click", triggerImport);
+  const importInput = app.querySelector("#import-file-input");
+  if (importInput) importInput.addEventListener("change", handleImportFile);
+
+  const backBtn = app.querySelector("[data-back-month]");
+  if (backBtn) backBtn.addEventListener("click", backToMonth);
+
+  app.querySelectorAll("[data-select-type]").forEach(el => el.addEventListener("click", () => selectType(el.getAttribute("data-select-type"))));
+
+  const changeBtn = app.querySelector("[data-change-type]");
+  if (changeBtn) changeBtn.addEventListener("click", requestChangeType);
+
+  app.querySelectorAll("[data-set-input]").forEach(el => el.addEventListener("input", () => {
+    updateSet(el.getAttribute("data-ex"), Number(el.getAttribute("data-idx")), el.getAttribute("data-field"), el.value);
+  }));
+
+  app.querySelectorAll("[data-start-edit]").forEach(el => el.addEventListener("click", () => startEdit(el.getAttribute("data-start-edit"), el.getAttribute("data-name"))));
+  const confirmEditBtn = app.querySelector("[data-confirm-edit]");
+  if (confirmEditBtn) confirmEditBtn.addEventListener("click", confirmEdit);
+  const cancelEditBtn = app.querySelector("[data-cancel-edit]");
+  if (cancelEditBtn) cancelEditBtn.addEventListener("click", cancelEdit);
+  const editInput = app.querySelector("[data-edit-input]");
+  if (editInput) {
+    editInput.focus();
+    editInput.setSelectionRange(editInput.value.length, editInput.value.length);
+    editInput.addEventListener("input", (e) => { state.editingValue = e.target.value; });
+    editInput.addEventListener("keydown", (e) => { if (e.key === "Enter") confirmEdit(); });
+  }
+
+  app.querySelectorAll("[data-delete-ex]").forEach(el => el.addEventListener("click", () => requestDelete(el.getAttribute("data-delete-ex"), el.getAttribute("data-name"))));
+
+  const startAddBtn = app.querySelector("[data-start-add]");
+  if (startAddBtn) startAddBtn.addEventListener("click", () => { state.adding = true; state.newExerciseName = ""; render(); });
+  const confirmAddBtn = app.querySelector("[data-confirm-add]");
+  if (confirmAddBtn) confirmAddBtn.addEventListener("click", confirmAdd);
+  const cancelAddBtn = app.querySelector("[data-cancel-add]");
+  if (cancelAddBtn) cancelAddBtn.addEventListener("click", () => { state.adding = false; state.newExerciseName = ""; render(); });
+  const newExInput = app.querySelector("[data-new-ex-input]");
+  if (newExInput) {
+    newExInput.focus();
+    newExInput.addEventListener("input", (e) => { state.newExerciseName = e.target.value; });
+    newExInput.addEventListener("keydown", (e) => { if (e.key === "Enter") confirmAdd(); });
+  }
+
+  const overlay = app.querySelector("[data-modal-overlay]");
+  if (overlay) overlay.addEventListener("click", () => { state.modal = null; render(); });
+  const modalCard = app.querySelector("[data-modal-card]");
+  if (modalCard) modalCard.addEventListener("click", (e) => e.stopPropagation());
+  const modalCancel = app.querySelector("[data-modal-cancel]");
+  if (modalCancel) modalCancel.addEventListener("click", () => { state.modal = null; render(); });
+  const modalConfirm = app.querySelector("[data-modal-confirm]");
+  if (modalConfirm && state.modal) modalConfirm.addEventListener("click", state.modal.onConfirm);
+}
+
+init();
+</script>
+</body>
+</html>
